@@ -27,7 +27,7 @@ app.set('port', process.env.PORT || 3000)
 
 // Ruta principal
 app.get('/', (req, res) => {
-    res.send("API Sistema Inteligente de Recomendación de Tesis")
+    res.send("Sistema Inteligente de Recomendación de Tesis")
 })
 
 
