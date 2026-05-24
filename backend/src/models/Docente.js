@@ -22,12 +22,12 @@ const docenteSchema = new Schema({
     rol: { type: String, default: "docente" }
 }, { timestamps: true })
 
-docenteSchema.pre('save', async function(next) {
-    if (!this.isModified('password')) return next()
+docenteSchema.pre('save', async function() {
+    if (!this.isModified('password')) return
     const salt = await bcrypt.genSalt(10)
     this.password = await bcrypt.hash(this.password, salt)
-    next()
 })
+
 
 docenteSchema.methods.matchPassword = async function(password) {
     return await bcrypt.compare(password, this.password)

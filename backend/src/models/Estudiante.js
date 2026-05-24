@@ -21,12 +21,10 @@ const estudianteSchema = new Schema({
     rol: { type: String, default: "estudiante" }
 }, { timestamps: true })
 
-// Optimización: Hook de Mongoose para cifrado automático antes de guardar
-estudianteSchema.pre('save', async function(next) {
-    if (!this.isModified('password')) return next()
+estudianteSchema.pre('save', async function() {
+    if (!this.isModified('password')) return
     const salt = await bcrypt.genSalt(10)
     this.password = await bcrypt.hash(this.password, salt)
-    next()
 })
 
 // Método para verificar password en el login

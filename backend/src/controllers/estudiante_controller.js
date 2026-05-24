@@ -17,7 +17,7 @@ const registro = async (req, res) => {
         }
         const nuevoEstudiante = new Estudiante(req.body)
         const token = nuevoEstudiante.createToken()
-        await sendMailToRegister(email, token)
+        await sendMailToRegister(email, token, "estudiante")
         await nuevoEstudiante.save()
         res.status(200).json({ msg: "Revisa tu correo para confirmar tu cuenta" })
     } catch (error) {
@@ -133,7 +133,7 @@ const recuperarPassword = async (req, res) => {
             return res.status(404).json({ msg: "El usuario no se encuentra registrado" })
         }
         const token = estudianteBDD.createToken()
-        await sendMailToRecoveryPassword(email, token)
+        await sendMailToRecoveryPassword(email, token, "estudiante")
         await estudianteBDD.save()
         res.status(200).json({ msg: "Revisa tu correo electronico para restablecer tu cuenta" })
     } catch (error) {

@@ -5,39 +5,22 @@ import estudianteRoutes from './routers/estudiante_routes.js'
 import docenteRoutes from './routers/docente_routes.js'
 import direccionRoutes from './routers/direccion_routes.js'
 
-
-// Inicializaciones
 const app = express()
 dotenv.config()
 
-
-// Configuraciones
-
-
-
-// Middlewares
 app.use(express.json())
 app.use(cors())
-app.use('/api', estudianteRoutes)
 
-
-// Variables globales
 app.set('port', process.env.PORT || 3000)
 
-
-// Ruta principal
 app.get('/', (req, res) => {
-    res.send("Sistema Inteligente de Recomendación de Tesis")
+    res.send("Sistema Inteligente de Recomendacion de Tesis")
 })
-
 
 app.use('/api/estudiante', estudianteRoutes)
 app.use('/api/docente', docenteRoutes)
 app.use('/api/direccion', direccionRoutes)
 
+app.use((req, res) => res.status(404).send("Endpoint no encontrado - 404"))
 
-// Manejo de una ruta que no sea encontrada
-app.use((req,res)=>res.status(404).send("Endpoint no encontrado - 404"))
-
-// Exportar app
 export default app

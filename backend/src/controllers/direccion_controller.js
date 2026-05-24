@@ -15,7 +15,7 @@ const registro = async (req, res) => {
         }
         const nuevaDireccion = new Direccion(req.body)
         const token = nuevaDireccion.createToken()
-        await sendMailToRegister(email, token)
+        await sendMailToRegister(email, token, "direccion")
         await nuevaDireccion.save()
         res.status(200).json({ msg: "Revisa tu correo para confirmar tu cuenta" })
     } catch (error) {
@@ -129,7 +129,7 @@ const recuperarPassword = async (req, res) => {
             return res.status(404).json({ msg: "El usuario no se encuentra registrado" })
         }
         const token = direccionBDD.createToken()
-        await sendMailToRecoveryPassword(email, token)
+        await sendMailToRecoveryPassword(email, token, "direccion")
         await direccionBDD.save()
         res.status(200).json({ msg: "Revisa tu correo electronico para restablecer tu cuenta" })
     } catch (error) {
