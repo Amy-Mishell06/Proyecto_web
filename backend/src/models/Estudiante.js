@@ -2,95 +2,43 @@ import { Schema, model } from 'mongoose'
 import bcrypt from 'bcryptjs'
 
 const estudianteSchema = new Schema({
-
-    nombre: {
-        type: String,
-        required: true,
-        trim: true
+    nombre: { type: String, required: true, trim: true },
+    apellido: { type: String, required: true, trim: true },
+    carrera: { type: String, required: true, trim: true },
+    email: { 
+        type: String, 
+        required: true, 
+        trim: true, 
+        unique: true,
+        match: [/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/, 'Formato de correo inválido']
     },
+    password: { type: String, required: true },
+    intereses: { type: [String], default: [] },
+    habilidades_tecnicas: { type: [String], default: [] }, // Clave para el motor de recomendación IA
+    status: { type: Boolean, default: true },
+    token: { type: String, default: null },
+    confirmEmail: { type: Boolean, default: false },
+    rol: { type: String, default: "estudiante" }
+}, { timestamps: true })
 
-    apellido: {
-        type: String,
-        required: true,
-        trim: true
-    },
-
-    carrera: {
-        type: String,
-        required: true,
-        trim: true
-    },
-
-    email: {
-        type: String,
-        required: true,
-        trim: true,
-        unique: true
-    },
-
-    password: {
-        type: String,
-        required: true
-    },
-
-    intereses: {
-        type: [String],
-        default: []
-    },
-
-    status: {
-        type: Boolean,
-        default: true
-    },
-
-    token: {
-        type: String,
-        default: null
-    },
-
-    confirmEmail: {
-        type: Boolean,
-        default: false
-    },
-
-    rol: {
-        type: String,
-        default: "estudiante"
-    }
-
-}, {
-    timestamps: true
+// Optimización: Hook de Mongoose para cifrado automático antes de guardar
+estudianteSchema.pre('save', async function(next) {
+    if (!this.isModified('password')) return next()
+    const salt = await bcrypt.genSalt(10)
+    this.password = await bcrypt.hash(this.password, salt)
+    next()
 })
 
-
-// Método para cifrar password
-estudianteSchema.methods.encryptPassword = async function(password) {
-
-    const salt = await bcrypt.genSalt(10)
-    const passwordEncrypt = await bcrypt.hash(password, salt)
-
-    return passwordEncrypt
-}
-
-
-// Método para verificar password
+// Método para verificar password en el login
 estudianteSchema.methods.matchPassword = async function(password) {
-
-    const response = await bcrypt.compare(password, this.password)
-
-    return response
+    return await bcrypt.compare(password, this.password)
 }
 
-
-// Método para generar token
+// Método para generar token de recuperación o confirmación
 estudianteSchema.methods.createToken = function() {
-
     const tokenGenerado = Math.random().toString(36).slice(2)
-
     this.token = tokenGenerado
-
     return tokenGenerado
 }
-
 
 export default model('Estudiante', estudianteSchema)

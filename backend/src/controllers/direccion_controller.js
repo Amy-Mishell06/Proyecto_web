@@ -1,0 +1,105 @@
+import Direccion from "../models/Direccion.js"
+import { sendMailToRegister } from "../helpers/sendMail.js"
+import { crearTokenJWT } from "../middlewares/JWT.js"
+import mongoose from "mongoose"
+
+const registro = async (req, res) => {
+    try {
+        const { email } = req.body
+        if (Object.values(req.body).includes("")) {
+            return res.status(400).json({ msg: "Debes llenar todos los campos" })
+        }
+        const existeEmail = await Direccion.findOne({ email })
+        if (existeEmail) {
+            return res.status(400).json({ msg: "El email ya esta registrado" })
+        }
+        const nuevaDireccion = new Direccion(req.body)
+        const token = nuevaDireccion.createToken()
+        await sendMailToRegister(email, token)
+        await nuevaDireccion.save()
+        res.status(200).json({ msg: "Revisa tu correo para confirmar tu cuenta" })
+    } catch (error) {
+        res.status(500).json({ msg: `Error en el servidor - ${error.message}` })
+    }
+}
+
+const login = async (req, res) => {
+    try {
+        const { email, password } = req.body
+        if (Object.values(req.body).includes("")) {
+            return res.status(400).json({ msg: "Debes llenar todos los campos" })
+        }
+        const direccionBDD = await Direccion.findOne({ email })
+        if (!direccionBDD) {
+            return res.status(404).json({ msg: "El administrador no esta registrado" })
+        }
+        if (!direccionBDD.confirmEmail) {
+            return res.status(403).json({ msg: "Debes confirmar tu cuenta" })
+        }
+        const verificarPassword = await direccionBDD.matchPassword(password)
+        if (!verificarPassword) {
+            return res.status(401).json({ msg: "Password incorrecto" })
+        }
+        const token = crearTokenJWT(direccionBDD._id, direccionBDD.rol)
+        const { nombre, apellido, cargo, _id, rol } = direccionBDD
+        res.status(200).json({ token, rol, nombre, apellido, cargo, _id, email: direccionBDD.email })
+    } catch (error) {
+        res.status(500).json({ msg: `Error en el servidor - ${error.message}` })
+    }
+}
+
+const perfil = (req, res) => {
+    const { token, confirmEmail, createdAt, updatedAt, __v, password, ...datosPerfil } = req.direccion._doc || req.direccion
+    res.status(200).json(datosPerfil)
+}
+
+const actualizarPerfil = async (req, res) => {
+    try {
+        const { id } = req.params
+        const { nombre, apellido, cargo, email } = req.body
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return res.status(400).json({ msg: `ID invalido: ${id}` })
+        }
+        const direccionBDD = await Direccion.findById(id)
+        if (!direccionBDD) {
+            return res.status(404).json({ msg: "Administrador no encontrado" })
+        }
+        if (Object.values(req.body).includes("")) {
+            return res.status(400).json({ msg: "Debes llenar todos los campos" })
+        }
+        if (direccionBDD.email !== email) {
+            const emailExistente = await Direccion.findOne({ email })
+            if (emailExistente) {
+                return res.status(400).json({ msg: "El email ya esta registrado" })
+            }
+        }
+        direccionBDD.nombre = nombre ?? direccionBDD.nombre
+        direccionBDD.apellido = apellido ?? direccionBDD.apellido
+        direccionBDD.cargo = cargo ?? direccionBDD.cargo
+        direccionBDD.email = email ?? direccionBDD.email
+        await direccionBDD.save()
+        res.status(200).json(direccionBDD)
+    } catch (error) {
+        res.status(500).json({ msg: `Error en el servidor - ${error.message}` })
+    }
+}
+
+const actualizarPassword = async (req, res) => {
+    try {
+        const direccionBDD = await Direccion.findById(req.direccion._id)
+        if (!direccionBDD) {
+            return res.status(404).json({ msg: "Usuario no encontrado" })
+        }
+        const verificarPassword = await direccionBDD.matchPassword(req.body.passwordactual)
+        if (!verificarPassword) {
+            return res.status(400).json({ msg: "El password actual no es correcto" })
+        }
+        direccionBDD.password = req.body.passwordnuevo
+        await direccionBDD.save()
+        res.status(200).json({ msg: "Password actualizado correctamente" })
+    } catch (error) {
+        res.status(500).json({ msg: `Error en el servidor - ${error.message}` })
+    }
+}
+
+export { registro, login, perfil, actualizarPerfil, actualizarPassword }
