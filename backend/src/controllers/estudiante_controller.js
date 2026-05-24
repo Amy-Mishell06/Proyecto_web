@@ -2,6 +2,8 @@ import Estudiante from "../models/Estudiante.js"
 import { sendMailToRegister } from "../helpers/sendMail.js"
 import { crearTokenJWT } from "../middlewares/JWT.js"
 import mongoose from "mongoose"
+import { sendMailToRecoveryPassword } from "../helpers/sendMail.js"
+
 
 const registro = async (req, res) => {
     try {
@@ -104,4 +106,85 @@ const actualizarPassword = async (req, res) => {
     }
 }
 
-export { registro, login, perfil, actualizarPerfil, actualizarPassword }
+const confirmarMail = async (req, res) => {
+    try {
+        const { token } = req.params
+        const estudianteBDD = await Estudiante.findOne({ token })
+        if (!estudianteBDD) {
+            return res.status(404).json({ msg: "Token invalido o cuenta ya confirmada" })
+        }
+        estudianteBDD.token = null
+        estudianteBDD.confirmEmail = true
+        await estudianteBDD.save()
+        res.status(200).json({ msg: "Cuenta confirmada, ya puedes iniciar sesion" })
+    } catch (error) {
+        res.status(500).json({ msg: `Error en el servidor - ${error.message}` })
+    }
+}
+
+const recuperarPassword = async (req, res) => {
+    try {
+        const { email } = req.body
+        if (!email) {
+            return res.status(400).json({ msg: "Debes ingresar un correo electronico" })
+        }
+        const estudianteBDD = await Estudiante.findOne({ email })
+        if (!estudianteBDD) {
+            return res.status(404).json({ msg: "El usuario no se encuentra registrado" })
+        }
+        const token = estudianteBDD.createToken()
+        await sendMailToRecoveryPassword(email, token)
+        await estudianteBDD.save()
+        res.status(200).json({ msg: "Revisa tu correo electronico para restablecer tu cuenta" })
+    } catch (error) {
+        res.status(500).json({ msg: `Error en el servidor - ${error.message}` })
+    }
+}
+
+const comprobarTokenPasword = async (req, res) => {
+    try {
+        const { token } = req.params
+        const estudianteBDD = await Estudiante.findOne({ token })
+        if (!estudianteBDD || estudianteBDD.token !== token) {
+            return res.status(404).json({ msg: "Lo sentimos, no se puede validar la cuenta" })
+        }
+        res.status(200).json({ msg: "Token confirmado, ya puedes crear tu nuevo password" })
+    } catch (error) {
+        res.status(500).json({ msg: `Error en el servidor - ${error.message}` })
+    }
+}
+
+const crearNuevoPassword = async (req, res) => {
+    try {
+        const { password, confirmpassword } = req.body
+        const { token } = req.params
+        if (Object.values(req.body).includes("")) {
+            return res.status(400).json({ msg: "Debes llenar todos los campos" })
+        }
+        if (password !== confirmpassword) {
+            return res.status(400).json({ msg: "Los passwords no coinciden" })
+        }
+        const estudianteBDD = await Estudiante.findOne({ token })
+        if (!estudianteBDD) {
+            return res.status(404).json({ msg: "No se puede validar la cuenta" })
+        }
+        estudianteBDD.token = null
+        estudianteBDD.password = password 
+        await estudianteBDD.save()
+        res.status(200).json({ msg: "Felicitaciones, ya puedes iniciar sesion con tu nuevo password" })
+    } catch (error) {
+        res.status(500).json({ msg: `Error en el servidor - ${error.message}` })
+    }
+}
+
+export {
+    registro,
+    login,
+    perfil,
+    actualizarPerfil,
+    actualizarPassword,
+    confirmarMail,
+    recuperarPassword,
+    comprobarTokenPasword,
+    crearNuevoPassword  
+}

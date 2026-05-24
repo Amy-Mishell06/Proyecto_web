@@ -1,10 +1,8 @@
 import jwt from "jsonwebtoken"
 import Estudiante from "../models/Estudiante.js"
+import Docente from "../models/Docente.js"
+import Direccion from "../models/Direccion.js"
 
-
-/**
- * Crear token JWT
- */
 const crearTokenJWT = (id, rol) => {
     return jwt.sign(
         { id, rol },
@@ -13,57 +11,43 @@ const crearTokenJWT = (id, rol) => {
     )
 }
 
-
-/**
- * Verificar token JWT
- */
 const verificarTokenJWT = async (req, res, next) => {
-
     const { authorization } = req.headers
 
     if (!authorization) {
-        return res.status(401).json({
-            msg: "Acceso denegado: token no proporcionado"
-        })
+        return res.status(401).json({ msg: "Acceso denegado: token no proporcionado" })
     }
 
     try {
-
         const token = authorization.split(" ")[1]
+        const { id, rol } = jwt.verify(token, process.env.JWT_SECRET)
 
-        const { id, rol } = jwt.verify(
-            token,
-            process.env.JWT_SECRET
-        )
+        let usuarioBDD
 
         if (rol === "estudiante") {
-
-            const estudianteBDD = await Estudiante.findById(id)
-                .lean()
-                .select("-password")
-
-            if (!estudianteBDD) {
-                return res.status(401).json({
-                    msg: "Usuario no encontrado"
-                })
-            }
-
-            // Guardar datos en la request
-            req.estudiante = estudianteBDD
-
-            next()
+            usuarioBDD = await Estudiante.findById(id).lean().select("-password")
+            if (!usuarioBDD) return res.status(401).json({ msg: "Usuario no encontrado" })
+            req.estudiante = usuarioBDD
+            
+        } else if (rol === "docente") {
+            usuarioBDD = await Docente.findById(id).lean().select("-password")
+            if (!usuarioBDD) return res.status(401).json({ msg: "Usuario no encontrado" })
+            req.docente = usuarioBDD
+            
+        } else if (rol === "direccion") {
+            usuarioBDD = await Direccion.findById(id).lean().select("-password")
+            if (!usuarioBDD) return res.status(401).json({ msg: "Usuario no encontrado" })
+            req.direccion = usuarioBDD
+            
+        } else {
+            return res.status(403).json({ msg: "Rol de usuario no valido" })
         }
 
+        next()
     } catch (error) {
-
-        console.log(error)
-
-        return res.status(401).json({
-            msg: `Token inválido o expirado - ${error}`
-        })
+        return res.status(401).json({ msg: `Token invalido o expirado - ${error.message}` })
     }
 }
-
 
 export {
     crearTokenJWT,
