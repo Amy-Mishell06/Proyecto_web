@@ -4,22 +4,28 @@ import { crearTokenJWT } from "../middlewares/JWT.js"
 import mongoose from "mongoose"
 
 const registro = async (req, res) => {
+    const { nombre, apellido, cargo, email, password } = req.body;
+    if (!nombre || !apellido || !cargo || !email || !password) {
+        return res.status(400).json({ msg: "Todos los campos son obligatorios" });
+    }
     try {
-        const { email } = req.body
-        if (Object.values(req.body).includes("")) {
-            return res.status(400).json({ msg: "Debes llenar todos los campos" })
-        }
-        const existeEmail = await Direccion.findOne({ email })
+        const existeEmail = await Direccion.findOne({ email });
         if (existeEmail) {
-            return res.status(400).json({ msg: "El email ya esta registrado" })
+            return res.status(400).json({ msg: "El email ya está registrado" });
         }
-        const nuevaDireccion = new Direccion(req.body)
-        const token = nuevaDireccion.createToken()
-        await sendMailToRegister(email, token, "direccion")
-        await nuevaDireccion.save()
-        res.status(200).json({ msg: "Revisa tu correo para confirmar tu cuenta" })
+        const nuevaDireccion = new Direccion(req.body);
+        const token = nuevaDireccion.createToken();
+        try {
+            await sendMailToRegister(email, token, "direccion");
+        } catch (mailError) {
+            console.error("Error enviando correo:", mailError);
+            return res.status(500).json({ msg: "Error al enviar el correo de confirmación" });
+        }
+        await nuevaDireccion.save();
+        res.status(200).json({ msg: "Revisa tu correo para confirmar tu cuenta" });
     } catch (error) {
-        res.status(500).json({ msg: `Error en el servidor - ${error.message}` })
+        console.error("Error detallado:", error); // Vital para debuggear
+        res.status(500).json({ msg: `Error en el servidor: ${error.message}` });
     }
 }
 
@@ -108,7 +114,7 @@ const confirmarMail = async (req, res) => {
         
         console.log("Token recibido en el servidor:", token);
 
-        const usuarioBDD = await Estudiante.findOne({ token });
+        const usuarioBDD = await Direccion.findOne({ token });
 
         if (!usuarioBDD) {
             return res.status(404).json({ msg: "Token invalido o cuenta ya confirmada" });

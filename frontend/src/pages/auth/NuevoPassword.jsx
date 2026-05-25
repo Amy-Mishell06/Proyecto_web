@@ -8,6 +8,9 @@ const NuevoPassword = () => {
     const { token } = useParams()
     const navigate = useNavigate()
     const { register, handleSubmit, formState: { errors } } = useForm()
+    
+    // ESTADOS
+    const [cargando, setCargando] = useState(true) // Nuevo estado para controlar el parpadeo
     const [tokenValido, setTokenValido] = useState(false)
     const [rolDetectado, setRolDetectado] = useState('')
     const intentoRealizado = useRef(false)
@@ -17,6 +20,7 @@ const NuevoPassword = () => {
         intentoRealizado.current = true;
 
         const comprobarToken = async () => {
+            setCargando(true) // Aseguramos carga al iniciar
             const roles = ['estudiante', 'docente', 'direccion']
             for (const rol of roles) {
                 try {
@@ -28,6 +32,7 @@ const NuevoPassword = () => {
                     continue
                 }
             }
+            setCargando(false) // Terminamos carga, ahora sí decidimos qué mostrar
         }
         comprobarToken()
     }, [token])
@@ -41,8 +46,7 @@ const NuevoPassword = () => {
         try {
             const url = `/${rolDetectado}/nuevopassword/${token}`
             const respuesta = await clienteAxios.post(url, {
-                password: data.password,
-                confirmpassword: data.confirmpassword
+                password: data.password
             })
             toast.success(respuesta.data.msg)
             navigate('/auth/login')
@@ -55,7 +59,10 @@ const NuevoPassword = () => {
         <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md mx-auto border border-slate-200 mt-10">
             <h1 className="text-2xl font-bold text-center text-slate-800 mb-6">Crear Nuevo Password</h1>
             
-            {tokenValido ? (
+            {/* Controlamos la vista basada en 'cargando' */}
+            {cargando ? (
+                <div className="text-center py-6 text-slate-600">Verificando enlace...</div>
+            ) : tokenValido ? (
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
                     <div>
                         <label className="block text-sm font-medium text-slate-700 mb-1">Nuevo Password</label>
@@ -86,7 +93,7 @@ const NuevoPassword = () => {
                 </form>
             ) : (
                 <div className="text-center">
-                    <p className="text-red-600 font-medium mb-6">Procesando token o el enlace ha expirado.</p>
+                    <p className="text-red-600 font-medium mb-6">El enlace de recuperación no es válido o ya expiró.</p>
                     <Link to="/auth/recuperarpassword" className="bg-slate-600 text-white font-bold py-2 px-6 rounded hover:bg-slate-700 transition-colors">
                         Solicitar uno nuevo
                     </Link>

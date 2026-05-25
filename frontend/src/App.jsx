@@ -3,26 +3,27 @@ import AuthLayout from './layouts/AuthLayout'
 import DashboardLayout from './layouts/DashboardLayout'
 
 // Paginas Publicas
-import Dashboard from './pages/Dashboard'
+import Landing from './pages/Landing'
 import Login from './pages/auth/Login'
 import Registro from './pages/auth/Registro'
 import ConfirmarCuenta from './pages/auth/ConfirmarCuenta'
 import RecuperarPassword from './pages/auth/RecuperarPassword'
 import NuevoPassword from './pages/auth/NuevoPassword'
 
-// Paginas Privadas (Ejemplos)
+// Paginas Privadas
 import Recomendaciones from './pages/estudiante/Recomendaciones'
 import PerfilEstudiante from './pages/estudiante/PerfilEstudiante'
 import SolicitudesEntrantes from './pages/docente/SolicitudesEntrantes'
 import PerfilDocente from './pages/docente/PerfilDocente'
 import DashboardGeneral from './pages/direccion/DashboardGeneral'
 import AuditoriaTramites from './pages/direccion/AuditoriaTramites'
+import PerfilDireccion from './pages/direccion/PerfilDireccion'
 
 const App = () => {
     return (
         <Routes>
             {/* 1. Landing Page */}
-            <Route path="/" element={<Dashboard />} />
+            <Route path="/" element={<Landing />} />
 
             {/* 2. Rutas Publicas (Login, Registro, Correos) */}
             <Route path="/auth" element={<AuthLayout />}>
@@ -47,6 +48,7 @@ const App = () => {
             <Route path="/direccion" element={<DashboardLayout rolesPermitidos={['direccion']} />}>
                 <Route index element={<DashboardGeneral />} />
                 <Route path="auditoria" element={<AuditoriaTramites />} />
+                <Route path="perfil" element={<PerfilDireccion />} />
             </Route>
 
             {/* Ruta por defecto */}

@@ -9,7 +9,7 @@ const DashboardLayout = ({ rolesPermitidos }) => {
     const { isAuthenticated, rol } = useAuthStore()
 
     if (!isAuthenticated) {
-        return <Navigate to="/auth/login" replace />
+        return <Navigate to="/" replace />
     }
 
     if (rolesPermitidos && !rolesPermitidos.includes(rol)) {

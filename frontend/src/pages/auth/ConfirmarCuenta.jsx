@@ -7,7 +7,7 @@ const ConfirmarCuenta = () => {
     const { token } = useParams()
     const [cuentaConfirmada, setCuentaConfirmada] = useState(false)
     const [cargando, setCargando] = useState(true)
-    const intentoRealizado = useRef(false) // Previene que el useEffect se ejecute dos veces (modo estricto de React)
+    const intentoRealizado = useRef(false)
 
     useEffect(() => {
         if (intentoRealizado.current) return;
@@ -20,12 +20,10 @@ const ConfirmarCuenta = () => {
             for (const rol of roles) {
                 try {
                     console.log(`Intentando confirmar como: ${rol}...`);
-                    // Solo si devuelve status 200, el codigo sigue a la siguiente linea
                     await clienteAxios.get(`/${rol}/confirmar/${token}`);
                     exito = true;
-                    break; // Si tiene exito, salimos del bucle
+                    break;
                 } catch (error) {
-                    // Si da 404, significa que no es ese rol. Ignoramos y probamos el siguiente.
                     console.log(`Fallo intento como ${rol}`);
                 }
             }

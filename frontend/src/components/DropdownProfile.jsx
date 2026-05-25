@@ -35,7 +35,7 @@ function DropdownProfile({ align }) {
   const handleLogout = () => {
     logout()
     setDropdownOpen(false)
-    navigate('/auth/login')
+    navigate('/')
   }
 
   return (

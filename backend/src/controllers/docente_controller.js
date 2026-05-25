@@ -5,14 +5,17 @@ import mongoose from "mongoose"
 
 const registro = async (req, res) => {
     try {
-        const { email } = req.body
-        if (Object.values(req.body).includes("")) {
-            return res.status(400).json({ msg: "Debes llenar todos los campos" })
+        const { email, password, nombre, apellido } = req.body
+
+        if (!email || !password || !nombre || !apellido) {
+            return res.status(400).json({ msg: "Debes llenar todos los campos obligatorios" })
         }
+
         const existeEmail = await Docente.findOne({ email })
         if (existeEmail) {
             return res.status(400).json({ msg: "El email ya esta registrado" })
         }
+
         const nuevoDocente = new Docente(req.body)
         const token = nuevoDocente.createToken()
         await sendMailToRegister(email, token, "docente")
@@ -111,15 +114,15 @@ const confirmarMail = async (req, res) => {
         
         console.log("Token recibido en el servidor:", token);
 
-        const usuarioBDD = await Estudiante.findOne({ token }); 
+        const docenteBDD = await Docente.findOne({ token }); 
 
-        if (!usuarioBDD) {
+        if (!docenteBDD) {
             return res.status(404).json({ msg: "Token invalido o cuenta ya confirmada" });
         }
         
-        usuarioBDD.token = null;
-        usuarioBDD.confirmEmail = true;
-        await usuarioBDD.save();
+        docenteBDD.token = null;
+        docenteBDD.confirmEmail = true;
+        await docenteBDD.save();
         
         res.status(200).json({ msg: "Cuenta confirmada, ya puedes iniciar sesion" });
     } catch (error) {

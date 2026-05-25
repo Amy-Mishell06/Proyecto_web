@@ -5,7 +5,8 @@ import clienteAxios from '../../config/axios'
 import { useAuthStore } from '../../store/authStore'
 
 const PerfilDocente = () => {
-    const { register, handleSubmit, reset } = useForm()
+    // Agregamos 'errors' a la desestructuración de useForm
+    const { register, handleSubmit, reset, formState: { errors } } = useForm()
     
     const { 
         register: registerPassword, 
@@ -60,9 +61,9 @@ const PerfilDocente = () => {
 
     const onSubmitPassword = async (data) => {
         try {
-            await clienteAxios.put('/docente/actualizar-password', data)
+            await clienteAxios.put('/docente/password', data) 
             toast.success("Contraseña actualizada correctamente")
-            resetPassword() // Limpia los campos tras el éxito
+            resetPassword()
         } catch (error) {
             toast.error(error.response?.data?.msg || "Error al actualizar contraseña")
         }
@@ -74,39 +75,35 @@ const PerfilDocente = () => {
         <div className="bg-white shadow-md rounded-sm border border-slate-200 p-6 max-w-3xl mx-auto">
             <header className="mb-6 border-b border-slate-100 pb-4">
                 <h2 className="text-2xl font-bold text-slate-800">Gestión de Cupos e Investigación</h2>
-                <p className="text-slate-500 text-sm mt-1">Configura tu disponibilidad y stack tecnológico para guiar proyectos de titulación en la ESFOT.</p>
             </header>
 
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-1">Cupos Máximos de Tutoría</label>
-                        <input type="number" min="0" max="15" {...register("cupos_maximos", { required: true })} className="w-full px-3 py-2 border border-slate-300 rounded-md focus:border-blue-500" />
+                        <label className="block text-sm font-medium text-slate-700 mb-1">Cupos Máximos</label>
+                        <input type="number" {...register("cupos_maximos", { required: true })} className="w-full px-3 py-2 border border-slate-300 rounded-md" />
                     </div>
-                    <div className="flex items-center mt-6">
-                        <input type="checkbox" {...register("disponibilidad")} className="w-4 h-4 text-blue-600 border-slate-300 rounded focus:ring-blue-500" id="disp" />
-                        <label htmlFor="disp" className="ml-2 block text-sm text-slate-700 font-medium">Cuenta activa para recibir nuevos tesistas</label>
+                    {/* Campo solicitado integrado */}
+                    <div>
+                        <label className="block text-sm font-medium text-slate-700 mb-1">Areas de Investigacion</label>
+                        <input
+                            type="text"
+                            {...register("areas_investigacion", { required: true })}
+                            className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:border-blue-500"
+                            placeholder="Separadas por comas (IA, Datos)"
+                        />
+                        {errors.areas_investigacion && <span className="text-xs text-red-500 mt-1 block">Requerido</span>}
                     </div>
                 </div>
 
-                <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Líneas de Investigación</label>
-                    <textarea {...register("areas_investigacion")} rows="2" className="w-full px-3 py-2 border border-slate-300 rounded-md focus:border-blue-500" placeholder="Ej: Machine Learning, Gestión de Proyectos, IoT..."></textarea>
-                </div>
-
-                <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Tecnologías de Especialidad</label>
-                    <textarea {...register("tecnologias_especialidad")} rows="2" className="w-full px-3 py-2 border border-slate-300 rounded-md focus:border-blue-500" placeholder="Ej: Python, React, Oracle SQL, C++..."></textarea>
-                </div>
-
-                <div className="flex justify-end pt-4 border-t border-slate-100">
-                    <button type="submit" className="bg-blue-600 text-white font-bold py-2 px-6 rounded hover:bg-blue-700 transition-colors">
+                <div className="flex justify-end pt-4">
+                    <button type="submit" className="bg-blue-600 text-white font-bold py-2 px-6 rounded hover:bg-blue-700">
                         Guardar Configuración
                     </button>
                 </div>
             </form>
 
-            {/* Formulario de Seguridad con la segunda instancia */}
+            {/* Formulario de Seguridad */}
             <form onSubmit={handleSubmitPassword(onSubmitPassword)} className="space-y-6 mt-10 pt-6 border-t border-slate-200">
                 <h3 className="text-xl font-bold text-slate-800">Seguridad</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -119,7 +116,7 @@ const PerfilDocente = () => {
                         <input type="password" {...registerPassword("passwordnuevo", { required: true })} className="w-full px-3 py-2 border border-slate-300 rounded-md" />
                     </div>
                 </div>
-                <button type="submit" className="bg-slate-800 text-white font-bold py-2 px-6 rounded hover:bg-slate-900 transition-colors">
+                <button type="submit" className="bg-slate-800 text-white font-bold py-2 px-6 rounded hover:bg-slate-900">
                     Actualizar Password
                 </button>
             </form>

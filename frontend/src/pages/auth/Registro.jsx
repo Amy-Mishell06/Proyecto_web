@@ -7,7 +7,8 @@ const Registro = () => {
     const { register, handleSubmit, watch, formState: { errors } } = useForm({
         defaultValues: {
             rol: 'estudiante'
-        }
+        },
+        shouldUnregister: true
     })
     const navigate = useNavigate()
     const rolSeleccionado = watch('rol')
