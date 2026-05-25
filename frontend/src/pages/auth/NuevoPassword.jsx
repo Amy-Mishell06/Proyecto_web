@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { toast } from 'react-toastify'
@@ -10,8 +10,12 @@ const NuevoPassword = () => {
     const { register, handleSubmit, formState: { errors } } = useForm()
     const [tokenValido, setTokenValido] = useState(false)
     const [rolDetectado, setRolDetectado] = useState('')
+    const intentoRealizado = useRef(false)
 
     useEffect(() => {
+        if (intentoRealizado.current) return;
+        intentoRealizado.current = true;
+
         const comprobarToken = async () => {
             const roles = ['estudiante', 'docente', 'direccion']
             for (const rol of roles) {
@@ -82,7 +86,7 @@ const NuevoPassword = () => {
                 </form>
             ) : (
                 <div className="text-center">
-                    <p className="text-red-600 font-medium mb-6">El enlace de recuperacion no es valido o ya expiro.</p>
+                    <p className="text-red-600 font-medium mb-6">Procesando token o el enlace ha expirado.</p>
                     <Link to="/auth/recuperarpassword" className="bg-slate-600 text-white font-bold py-2 px-6 rounded hover:bg-slate-700 transition-colors">
                         Solicitar uno nuevo
                     </Link>

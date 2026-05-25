@@ -31,11 +31,18 @@ const PerfilDocente = () => {
     const onSubmit = async (formData) => {
         try {
             const payload = { ...formData }
-            payload.areas_investigacion = payload.areas_investigacion.split(',').map(item => item.trim()).filter(Boolean)
-            payload.tecnologias_especialidad = payload.tecnologias_especialidad.split(',').map(item => item.trim()).filter(Boolean)
+            
+            payload.areas_investigacion = typeof payload.areas_investigacion === 'string' 
+                ? payload.areas_investigacion.split(',').map(item => item.trim()).filter(Boolean) 
+                : payload.areas_investigacion || []
+                
+            payload.tecnologias_especialidad = typeof payload.tecnologias_especialidad === 'string' 
+                ? payload.tecnologias_especialidad.split(',').map(item => item.trim()).filter(Boolean) 
+                : payload.tecnologias_especialidad || []
+                
             payload.cupos_maximos = Number(payload.cupos_maximos)
 
-            const { data } = await clienteAxios.put(`/docente/perfil/${user._id}`, payload)
+            const { data } = await clienteAxios.put(`/docente/perfil/${user?._id}`, payload)
             
             setAuth(token, data, rol)
             toast.success("Parametros de tutoria actualizados")

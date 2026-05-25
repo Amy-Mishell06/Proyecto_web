@@ -32,11 +32,16 @@ const PerfilEstudiante = () => {
     const onSubmit = async (formData) => {
         try {
             const payload = { ...formData }
-            // Convertir el texto separado por comas nuevamente en arreglos limpios para la IA
-            payload.intereses = payload.intereses.split(',').map(item => item.trim()).filter(Boolean)
-            payload.habilidades_tecnicas = payload.habilidades_tecnicas.split(',').map(item => item.trim()).filter(Boolean)
+            // Verificamos si es string antes de hacer el split para evitar el crash
+            payload.intereses = typeof payload.intereses === 'string' 
+                ? payload.intereses.split(',').map(item => item.trim()).filter(Boolean) 
+                : payload.intereses || []
+                
+            payload.habilidades_tecnicas = typeof payload.habilidades_tecnicas === 'string' 
+                ? payload.habilidades_tecnicas.split(',').map(item => item.trim()).filter(Boolean) 
+                : payload.habilidades_tecnicas || []
 
-            const { data } = await clienteAxios.put(`/estudiante/perfil/${user._id}`, payload)
+            const { data } = await clienteAxios.put(`/estudiante/perfil/${user?._id}`, payload)
             
             setAuth(token, data, rol)
             toast.success("Perfil tecnico actualizado con exito")

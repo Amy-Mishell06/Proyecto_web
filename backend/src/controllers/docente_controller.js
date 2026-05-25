@@ -107,17 +107,24 @@ const actualizarPassword = async (req, res) => {
 
 const confirmarMail = async (req, res) => {
     try {
-        const { token } = req.params
-        const docenteBDD = await Docente.findOne({ token })
-        if (!docenteBDD) {
-            return res.status(404).json({ msg: "Token invalido o cuenta ya confirmada" })
+        const { token } = req.params;
+        
+        console.log("Token recibido en el servidor:", token);
+
+        const usuarioBDD = await Estudiante.findOne({ token }); 
+
+        if (!usuarioBDD) {
+            return res.status(404).json({ msg: "Token invalido o cuenta ya confirmada" });
         }
-        docenteBDD.token = null
-        docenteBDD.confirmEmail = true
-        await docenteBDD.save()
-        res.status(200).json({ msg: "Cuenta confirmada, ya puedes iniciar sesion" })
+        
+        usuarioBDD.token = null;
+        usuarioBDD.confirmEmail = true;
+        await usuarioBDD.save();
+        
+        res.status(200).json({ msg: "Cuenta confirmada, ya puedes iniciar sesion" });
     } catch (error) {
-        res.status(500).json({ msg: `Error en el servidor - ${error.message}` })
+        console.error("Error confirmando correo:", error);
+        res.status(500).json({ msg: `Error en el servidor - ${error.message}` });
     }
 }
 
