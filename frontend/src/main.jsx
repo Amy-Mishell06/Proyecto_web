@@ -8,12 +8,12 @@ import 'react-toastify/dist/ReactToastify.css'
 import './css/style.css'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
-  <React.StrictMode>
+  //<React.StrictMode>
     <BrowserRouter>
       <ThemeProvider>
         <App />
         <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} />
       </ThemeProvider>
     </BrowserRouter>
-  </React.StrictMode>
+  //</React.StrictMode>
 )
