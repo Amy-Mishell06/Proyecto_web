@@ -1,7 +1,7 @@
 import sendMail from "../config/nodemailer.js"
 
-const sendMailToRegister = (userMail, token, rol) => {
-    return sendMail(
+const sendMailToRegister = async (userMail, token, rol) => {
+    return await sendMail(
         userMail,
         "Confirmacion de Cuenta - Sistema de Recomendacion de Tesis ESFOT",
         `
@@ -28,8 +28,8 @@ const sendMailToRegister = (userMail, token, rol) => {
     )
 }
 
-const sendMailToRecoveryPassword = (userMail, token, rol) => {
-    return sendMail(
+const sendMailToRecoveryPassword = async (userMail, token, rol) => {
+    return await sendMail(
         userMail,
         "Recuperacion de Password - Sistema de Recomendacion de Tesis ESFOT",
         `
