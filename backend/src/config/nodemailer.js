@@ -11,7 +11,7 @@ const transporter = nodemailer.createTransport({
         pass: process.env.PASS_MAILTRAP,
     },
     tls: {
-    rejectUnauthorized: false
+        rejectUnauthorized: false
     }
 })
 
