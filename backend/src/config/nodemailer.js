@@ -1,15 +1,11 @@
 import nodemailer from "nodemailer"
 import dotenv from "dotenv"
-import dns from "dns"
-
-dns.setDefaultResultOrder('ipv4first')
 
 dotenv.config()
 
 const transporter = nodemailer.createTransport({
     host: process.env.HOST_MAILTRAP,
     port: process.env.PORT_MAILTRAP,
-    secure: true,
     auth: {
         user: process.env.USER_MAILTRAP,
         pass: process.env.PASS_MAILTRAP,
