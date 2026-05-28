@@ -17,8 +17,8 @@ const registro = async (req, res) => {
         }
         const nuevoEstudiante = new Estudiante(req.body)
         const token = nuevoEstudiante.createToken()
-        await nuevoEstudiante.save()
         await sendMailToRegister(email, token, "estudiante")
+        await nuevoEstudiante.save()
         res.status(200).json({ msg: "Revisa tu correo para confirmar tu cuenta" })
     } catch (error) {
         res.status(500).json({ msg: `Error en el servidor - ${error.message}` })
