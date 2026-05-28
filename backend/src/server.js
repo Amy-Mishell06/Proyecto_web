@@ -8,10 +8,10 @@ import direccionRoutes from './routers/direccion_routes.js'
 const app = express()
 dotenv.config()
 
+app.set('port', process.env.PORT || 3000)
+
 app.use(express.json())
 app.use(cors())
-
-app.set('port', process.env.PORT || 3000)
 
 app.get('/', (req, res) => {
     res.send("Sistema Inteligente de Recomendacion de Tesis")
