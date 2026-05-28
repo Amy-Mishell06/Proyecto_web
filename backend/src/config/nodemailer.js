@@ -5,7 +5,7 @@ dotenv.config()
 
 const transporter = nodemailer.createTransport({
     host: process.env.HOST_MAILTRAP,
-    port: process.env.PORT_MAILTRAP,
+    port: 2525,
     auth: {
         user: process.env.USER_MAILTRAP,
         pass: process.env.PASS_MAILTRAP,
